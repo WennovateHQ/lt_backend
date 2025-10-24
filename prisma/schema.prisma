@@ -1,0 +1,738 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                     String          @id @default(cuid())
+  email                  String          @unique
+  password               String?
+  userType               UserType
+  status                 UserStatus      @default(PENDING_VERIFICATION)
+  auth0Id                String?         @unique
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  lastLogin              DateTime?
+  emailVerified          Boolean         @default(false)
+  emailVerifiedAt        DateTime?
+  phoneVerified          Boolean         @default(false)
+  phoneVerifiedAt        DateTime?
+  businessVerified       Boolean         @default(false)
+  identityVerified       Boolean         @default(false)
+  verificationToken      String?
+  resetToken             String?
+  resetTokenExpiry       DateTime?
+  stripeConnectAccountId String?         @unique
+  stripeCustomerId       String?         @unique
+  suspendedAt            DateTime?
+  suspendedUntil         DateTime?
+  suspendedBy            String?
+  suspendedReason        String?
+  lastActiveAt           DateTime?
+  applications           Application[]
+  bankAccounts           BankAccount[]
+  businessContracts      Contract[]      @relation("BusinessContracts")
+  talentContracts        Contract[]      @relation("TalentContracts")
+  receivedMessages       Message[]       @relation("ReceivedMessages")
+  sentMessages           Message[]       @relation("SentMessages")
+  notifications          Notification[]
+  payments               Payment[]
+  portfolioItems         PortfolioItem[]
+  profile                Profile?
+  businessProjects       Project[]
+  receivedReviews        Review[]        @relation("ReviewsReceived")
+  reviews                Review[]        @relation("ReviewsGiven")
+  savedTalents           SavedTalent[]   @relation("BusinessSavedTalents")
+  savedByBusinesses      SavedTalent[]   @relation("TalentSavedBy")
+  withdrawals            Withdrawal[]
+
+  @@map("users")
+}
+
+model Profile {
+  id                 String               @id @default(cuid())
+  userId             String               @unique
+  firstName          String
+  lastName           String
+  displayName        String?
+  bio                String?
+  avatar             String?
+  phone              String?
+  website            String?
+  companyName        String?
+  companySize        String?
+  industry           String?
+  title              String?
+  hourlyRate         Decimal?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  gstHstNumber       String?
+  taxExempt          Boolean              @default(false)
+  sin                String?
+  bankInstitution    String?
+  bankTransit        String?
+  bankAccount        String?
+  bankAccountHolder  String?
+  availability       Availability?
+  credentials        Credential[]
+  industryExperience IndustryExperience[]
+  location           Location?
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills             UserSkill[]
+  workPreferences    WorkPreferences?
+
+  @@map("profiles")
+}
+
+model Location {
+  id         String   @id @default(cuid())
+  profileId  String   @unique
+  street     String?
+  city       String
+  province   String
+  country    String   @default("Canada")
+  postalCode String?
+  latitude   Decimal?
+  longitude  Decimal?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  profile    Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("locations")
+}
+
+model Skill {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  category      String
+  description   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  projectSkills ProjectSkill[]
+  userSkills    UserSkill[]
+
+  @@map("skills")
+}
+
+model UserSkill {
+  id         String   @id @default(cuid())
+  profileId  String
+  skillId    String
+  level      Int      @default(1)
+  experience Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  profile    Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, skillId])
+  @@map("user_skills")
+}
+
+model Project {
+  id                     String         @id @default(cuid())
+  businessId             String
+  title                  String
+  description            String
+  type                   ProjectType
+  status                 ProjectStatus  @default(DRAFT)
+  category               String?
+  budgetMin              Decimal?
+  budgetMax              Decimal?
+  hourlyRate             Decimal?
+  startDate              DateTime?
+  endDate                DateTime?
+  duration               String?
+  isRemote               Boolean        @default(false)
+  city                   String?
+  province               String?
+  experienceLevel        String?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  publishedAt            DateTime?
+  additionalRequirements String?
+  deadlineFlexible       Boolean        @default(false)
+  hybridPercentage       Int?
+  industry               String?
+  location               String?
+  locationNotes          String?
+  travelRadius           Int?
+  workArrangement        String?
+  attachments            String[]       @default([])
+  applications           Application[]
+  contracts              Contract[]
+  skills                 ProjectSkill[]
+  business               User           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  savedTalents           SavedTalent[]
+  messages               Message[]
+
+  @@map("projects")
+}
+
+model ProjectSkill {
+  id        String   @id @default(cuid())
+  projectId String
+  skillId   String
+  required  Boolean  @default(true)
+  level     Int?
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, skillId])
+  @@map("project_skills")
+}
+
+model Application {
+  id                String            @id @default(cuid())
+  projectId         String
+  talentId          String
+  coverLetter       String?
+  proposedRate      Decimal?
+  estimatedHours    Int?
+  availability      String?
+  status            ApplicationStatus @default(PENDING)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  attachments       String[]          @default([])
+  proposedApproach  String?
+  proposedBudget    Decimal?
+  questions         String?
+  selectedPortfolio String[]          @default([])
+  timeline          String?
+  feedback          String?
+  interviewDate     DateTime?
+  reviewedAt        DateTime?
+  project           Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  talent            User              @relation(fields: [talentId], references: [id], onDelete: Cascade)
+  contract          Contract?
+  messages          Message[]
+
+  @@unique([projectId, talentId])
+  @@map("applications")
+}
+
+model Contract {
+  id                         String         @id @default(cuid())
+  projectId                  String
+  businessId                 String
+  talentId                   String
+  applicationId              String         @unique
+  title                      String
+  description                String
+  terms                      String?
+  totalAmount                Decimal
+  hourlyRate                 Decimal?
+  estimatedHours             Decimal?
+  status                     ContractStatus @default(DRAFT)
+  startDate                  DateTime?
+  endDate                    DateTime?
+  businessSignedAt           DateTime?
+  talentSignedAt             DateTime?
+  createdAt                  DateTime       @default(now())
+  updatedAt                  DateTime       @updatedAt
+  signedAt                   DateTime?
+  completedAt                DateTime?
+  scopeOfWork                String?
+  deliverables               String?
+  paymentSchedule            String?
+  duration                   String?
+  cancellationPolicy         String?
+  intellectualPropertyRights String?
+  application                Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  business                   User           @relation("BusinessContracts", fields: [businessId], references: [id], onDelete: Cascade)
+  project                    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  talent                     User           @relation("TalentContracts", fields: [talentId], references: [id], onDelete: Cascade)
+  escrowAccount              EscrowAccount?
+  messages                   Message[]
+  milestones                 Milestone[]
+  payments                   Payment[]
+  reviews                    Review[]
+  timeEntries                TimeEntry[]
+
+  @@map("contracts")
+}
+
+model Milestone {
+  id              String          @id @default(cuid())
+  contractId      String
+  title           String
+  description     String?
+  amount          Decimal
+  dueDate         DateTime?
+  order           Int             @default(1)
+  status          MilestoneStatus @default(PENDING)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  submittedAt     DateTime?
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  deliverables    Deliverable[]
+  contract        Contract        @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  payments        Payment[]
+  timeEntries     TimeEntry[]
+
+  @@map("milestones")
+}
+
+model Deliverable {
+  id              String            @id @default(cuid())
+  milestoneId     String
+  title           String
+  description     String?
+  fileUrl         String?
+  status          DeliverableStatus @default(PENDING)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  submittedAt     DateTime?
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  milestone       Milestone         @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+
+  @@map("deliverables")
+}
+
+model TimeEntry {
+  id              String          @id @default(cuid())
+  contractId      String
+  milestoneId     String?
+  date            DateTime
+  hours           Decimal
+  description     String
+  status          TimeEntryStatus @default(PENDING)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  contract        Contract        @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  milestone       Milestone?      @relation(fields: [milestoneId], references: [id])
+
+  @@map("time_entries")
+}
+
+model Payment {
+  id                    String        @id @default(cuid())
+  contractId            String
+  milestoneId           String?
+  payerId               String
+  payeeId               String
+  amount                Decimal
+  platformFee           Decimal
+  netAmount             Decimal
+  currency              String        @default("CAD")
+  status                PaymentStatus @default(PENDING)
+  stripePaymentIntentId String?
+  stripeTransferId      String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  processedAt           DateTime?
+  contract              Contract      @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  milestone             Milestone?    @relation(fields: [milestoneId], references: [id])
+  payer                 User          @relation(fields: [payerId], references: [id])
+
+  @@map("payments")
+}
+
+model EscrowAccount {
+  id                    String              @id @default(cuid())
+  contractId            String              @unique
+  totalAmount           Decimal
+  status                EscrowStatus        @default(PENDING_FUNDING)
+  stripePaymentIntentId String?
+  fundedAt              DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  contract              Contract            @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  transactions          EscrowTransaction[]
+
+  @@map("escrow_accounts")
+}
+
+model EscrowTransaction {
+  id                    String                  @id @default(cuid())
+  escrowAccountId       String
+  type                  EscrowTransactionType
+  amount                Decimal
+  status                EscrowTransactionStatus @default(PENDING)
+  stripePaymentIntentId String?
+  description           String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  processedAt           DateTime?
+  escrowAccount         EscrowAccount           @relation(fields: [escrowAccountId], references: [id], onDelete: Cascade)
+
+  @@map("escrow_transactions")
+}
+
+model Review {
+  id                    String           @id @default(cuid())
+  reviewerId            String
+  revieweeId            String
+  contractId            String
+  reviewType            ReviewType
+  rating                Int
+  overallRating         Int
+  title                 String?
+  comment               String?
+  qualityRating         Int?
+  communicationRating   Int?
+  timelinessRating      Int?
+  clarityRating         Int?
+  paymentRating         Int?
+  professionalismRating Int?
+  isPublic              Boolean          @default(true)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  contract              Contract         @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  reviewee              User             @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade)
+  reviewer              User             @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)
+  flags                 ReviewFlag[]
+  response              ReviewResponse?
+
+  @@unique([reviewerId, revieweeId, contractId])
+  @@map("reviews")
+}
+
+model ReviewResponse {
+  id          String   @id @default(cuid())
+  reviewId    String   @unique
+  responderId String
+  response    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  review      Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@map("review_responses")
+}
+
+model ReviewFlag {
+  id           String   @id @default(cuid())
+  reviewId     String
+  flaggedById  String
+  reason       String
+  createdAt    DateTime @default(now())
+  review       Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, flaggedById])
+  @@map("review_flags")
+}
+
+model Message {
+  id            String        @id @default(cuid())
+  contractId    String?
+  projectId     String?
+  senderId      String
+  receiverId    String
+  subject       String?
+  content       String
+  attachments   String[]      @default([])
+  status        MessageStatus @default(SENT)
+  createdAt     DateTime      @default(now())
+  readAt        DateTime?
+  applicationId String?
+  application   Application?  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  contract      Contract?     @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  project       Project?      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  receiver      User          @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender        User          @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  read      Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model PortfolioItem {
+  id           String   @id @default(cuid())
+  userId       String
+  title        String
+  description  String
+  projectUrl   String?
+  imageUrl     String?
+  technologies String[] @default([])
+  completedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_items")
+}
+
+model SavedTalent {
+  id         String   @id @default(cuid())
+  businessId String
+  talentId   String
+  projectId  String?
+  notes      String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  business   User     @relation("BusinessSavedTalents", fields: [businessId], references: [id], onDelete: Cascade)
+  project    Project? @relation(fields: [projectId], references: [id])
+  talent     User     @relation("TalentSavedBy", fields: [talentId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, talentId])
+  @@map("saved_talents")
+}
+
+model BankAccount {
+  id                      String   @id @default(cuid())
+  userId                  String
+  stripeExternalAccountId String   @unique
+  accountHolderName       String
+  accountType             String
+  currency                String   @default("CAD")
+  last4                   String
+  isDefault               Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("bank_accounts")
+}
+
+model Withdrawal {
+  id             String   @id @default(cuid())
+  userId         String
+  amount         Decimal  @db.Decimal(10, 2)
+  currency       String   @default("CAD")
+  status         String
+  stripePayoutId String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("withdrawals")
+}
+
+model Credential {
+  id            String         @id @default(cuid())
+  profileId     String
+  title         String
+  issuer        String
+  type          CredentialType
+  description   String?
+  credentialUrl String?
+  issuedDate    DateTime
+  expiryDate    DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  profile       Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("credentials")
+}
+
+model WorkPreferences {
+  id                 String   @id @default(cuid())
+  profileId          String   @unique
+  arrangements       String[] @default([])
+  projectTypes       String[] @default([])
+  industries         String[] @default([])
+  preferredLocations String[] @default([])
+  travelRadius       Int      @default(25)
+  onSitePercentage   Int      @default(50)
+  teamSize           String?
+  communicationStyle String?
+  workingHours       String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  profile            Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("work_preferences")
+}
+
+model IndustryExperience {
+  id          String   @id @default(cuid())
+  profileId   String
+  industry    String
+  years       Int
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("industry_experiences")
+}
+
+model Availability {
+  id           String             @id @default(cuid())
+  profileId    String             @unique
+  status       AvailabilityStatus @default(AVAILABLE)
+  hoursPerWeek Int?               @default(40)
+  startDate    DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  profile      Profile            @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("availabilities")
+}
+
+enum UserType {
+  BUSINESS
+  TALENT
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ProjectType {
+  FIXED_PRICE
+  HOURLY
+}
+
+enum ApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  SHORTLISTED
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum ContractStatus {
+  DRAFT
+  PENDING_SIGNATURES
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  DISPUTED
+  IN_PROGRESS
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum MessageStatus {
+  SENT
+  READ
+}
+
+enum NotificationType {
+  APPLICATION_RECEIVED
+  APPLICATION_STATUS_CHANGED
+  NEW_MESSAGE
+  CONTRACT_SIGNED
+  MILESTONE_SUBMITTED
+  MILESTONE_APPROVED
+  MILESTONE_REJECTED
+  PAYMENT_RECEIVED
+  PAYMENT_RELEASED
+  ESCROW_FUNDED
+  STRIPE_SETUP_REQUIRED
+  NEW_REVIEW
+  SYSTEM_ANNOUNCEMENT
+  ACCOUNT_UPDATE
+}
+
+enum PaymentType {
+  PROJECT_PAYMENT
+  MILESTONE_PAYMENT
+  ESCROW_FUNDING
+  WITHDRAWAL
+}
+
+enum WithdrawalStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum EscrowStatus {
+  PENDING_FUNDING
+  FUNDED
+  PARTIALLY_RELEASED
+  FULLY_RELEASED
+  PAYMENT_FAILED
+}
+
+enum EscrowTransactionType {
+  FUNDING
+  RELEASE
+  REFUND
+}
+
+enum EscrowTransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum CredentialType {
+  CERTIFICATION
+  EDUCATION
+  LICENSE
+  AWARD
+  COURSE
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  BUSY
+  UNAVAILABLE
+}
+
+enum DeliverableStatus {
+  PENDING
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum TimeEntryStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum ReviewType {
+  BUSINESS_TO_TALENT
+  TALENT_TO_BUSINESS
+}
