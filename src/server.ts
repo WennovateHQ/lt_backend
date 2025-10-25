@@ -81,7 +81,7 @@ process.on('beforeExit', async () => {
 
 // Server configuration
 console.log('⚙️ Setting up server configuration...');
-const PORT = process.env['PORT'] || 5000;
+const PORT = process.env['PORT'] || 8080;
 console.log(`📡 Server will run on port: ${PORT}`);
 
 // NOTE: Multer storage configurations commented out - file uploads handled via modular routes
@@ -285,7 +285,7 @@ console.log('🗄️ Prisma client initialized');
 
 // Add a simple test route first
 app.get('/health', (req, res) => {
-  return res.json({ status: 'OK', message: 'LocalTalents API Server is running' });
+  return res.json({ status: 'OK', timestamp: new Date().toISOString(), message: 'LocalTalents API Server is running' });
 });
 
 // Add Stripe test endpoint
