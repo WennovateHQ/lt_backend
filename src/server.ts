@@ -289,7 +289,7 @@ app.get('/health', (req, res) => {
 });
 
 // Add Stripe test endpoint
-app.get('/api/stripe/test', (req, res) => {
+app.get('/stripe/test', (req, res) => {
   try {
     const stripeConfigured = !!process.env['STRIPE_SECRET_KEY'];
     const webhookConfigured = !!process.env['STRIPE_WEBHOOK_SECRET'];
@@ -300,7 +300,7 @@ app.get('/api/stripe/test', (req, res) => {
       stripe: {
         secretKeyConfigured: stripeConfigured,
         webhookSecretConfigured: webhookConfigured,
-        webhookUrl: 'http://localhost:5000/api/webhooks/stripe'
+        webhookUrl: 'http://localhost:5000/webhooks/stripe'
       },
       timestamp: new Date().toISOString()
     });
@@ -310,7 +310,7 @@ app.get('/api/stripe/test', (req, res) => {
 });
 
 // Add portfolio integration test endpoint
-app.get('/api/debug/portfolio-integration', async (req, res) => {
+app.get('/debug/portfolio-integration', async (req, res) => {
   try {
     console.log('📁 Portfolio integration test endpoint called');
     
@@ -362,7 +362,7 @@ app.get('/api/debug/portfolio-integration', async (req, res) => {
 });
 
 // Add database test endpoint
-app.get('/api/debug/database', async (req, res) => {
+app.get('/debug/database', async (req, res) => {
   try {
     console.log('🗄️ Database test endpoint called');
     
@@ -668,7 +668,7 @@ async function handleAccountUpdated(account: any) {
 }
 
 // POST /api/webhooks/stripe - Stripe webhook handler (MUST be before express.json())
-app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+app.post('/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
   try {
     console.log('🔔 Stripe webhook endpoint hit');
     console.log('📋 Headers:', req.headers);
@@ -822,7 +822,7 @@ app.get('/health', (req, res) => {
 });
 
 // Database connection test endpoint
-app.get('/api/test/db', async (req, res) => {
+app.get('/test/db', async (req, res) => {
   try {
     console.log('🔍 Testing database connection...');
     const start = Date.now();
@@ -875,7 +875,7 @@ app.get('/', (req, res) => {
 /*
 // Skills routes - with real database integration
 console.log('📋 Adding Skills routes...');
-app.get('/api/skills', async (req, res) => {
+app.get('/skills', async (req, res) => {
   try {
     console.log('📋 Skills endpoint called');
     
@@ -909,7 +909,7 @@ console.log('✅ Skills route registered');
 /*
 // Users routes - with real database integration  
 console.log('👥 Adding Users routes...');
-app.get('/api/users', async (req, res) => {
+app.get('/users', async (req, res) => {
   try {
     console.log('👥 Users endpoint called');
     
@@ -953,7 +953,7 @@ console.log('✅ Users route registered');
 */
 
 // Portfolio routes - for user portfolio management
-app.get('/api/users/:userId/portfolio', async (req, res) => {
+app.get('/users/:userId/portfolio', async (req, res) => {
   try {
     const { userId } = req.params;
     console.log(`📁 Portfolio endpoint called for user: ${userId}`);
@@ -978,7 +978,7 @@ console.log('✅ Portfolio route registered');
 
 // Users routes - temporarily add simple profile endpoint
 console.log('👥 Adding Users routes...');
-app.get('/api/users/profile', authenticateToken, async (req, res) => {
+app.get('/users/profile', authenticateToken, async (req, res) => {
   try {
     console.log('👤 Get user profile endpoint called', { userId: req.user!.id });
     
@@ -1029,7 +1029,7 @@ app.get('/api/users/profile', authenticateToken, async (req, res) => {
   }
 });
 
-app.put('/api/users/profile', authenticateToken, async (req, res) => {
+app.put('/users/profile', authenticateToken, async (req, res) => {
   try {
     console.log('👤 Update user profile endpoint called', { userId: req.user!.id });
     const { city, province, provinceCode, country, ...profileData } = req.body;
@@ -1102,7 +1102,7 @@ app.put('/api/users/profile', authenticateToken, async (req, res) => {
 });
 
 // PUT /api/users/profile/banking - Update banking and tax information
-app.put('/api/users/profile/banking', authenticateToken, async (req, res) => {
+app.put('/users/profile/banking', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { sin, bankInstitution, bankTransit, bankAccount, bankAccountHolder, gstHstNumber } = req.body;
@@ -1159,7 +1159,7 @@ app.put('/api/users/profile/banking', authenticateToken, async (req, res) => {
 });
 
 // GET /api/users/profile/banking - Get banking information
-app.get('/api/users/profile/banking', authenticateToken, async (req, res) => {
+app.get('/users/profile/banking', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     
@@ -1206,7 +1206,7 @@ app.get('/api/users/profile/banking', authenticateToken, async (req, res) => {
 });
 
 // Credentials endpoints
-app.post('/api/users/credentials', authenticateToken, async (req, res) => {
+app.post('/users/credentials', authenticateToken, async (req, res) => {
   try {
     const { title, issuer, type, description, credentialUrl, issuedDate, expiryDate } = req.body;
     
@@ -1250,7 +1250,7 @@ app.post('/api/users/credentials', authenticateToken, async (req, res) => {
   }
 });
 
-app.put('/api/users/credentials/:id', authenticateToken, async (req, res) => {
+app.put('/users/credentials/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     console.log('🎓 Update credential endpoint called', { id, body: req.body });
@@ -1339,7 +1339,7 @@ app.put('/api/users/credentials/:id', authenticateToken, async (req, res) => {
   }
 });
 
-app.delete('/api/users/credentials/:credentialId', authenticateToken, async (req, res) => {
+app.delete('/users/credentials/:credentialId', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -1356,7 +1356,7 @@ app.delete('/api/users/credentials/:credentialId', authenticateToken, async (req
 
 // POST /api/users/credentials/:id/upload-attachments - Upload credential attachments
 // TODO: Add attachments field to Credential schema if needed
-app.post('/api/users/credentials/:id/upload-attachments', authenticateToken, credentialAttachmentUpload.array('attachments', 5), async (req, res) => {
+app.post('/users/credentials/:id/upload-attachments', authenticateToken, credentialAttachmentUpload.array('attachments', 5), async (req, res) => {
   try {
     const { id } = req.params;
     console.log('📎 Credential attachment upload endpoint called', { credentialId: id, userId: req.user!.id });
@@ -1401,7 +1401,7 @@ app.post('/api/users/credentials/:id/upload-attachments', authenticateToken, cre
 });
 
 // DELETE /api/users/credentials/:id/attachments/:index - Remove specific attachment
-app.delete('/api/users/credentials/:id/attachments/:index', authenticateToken, async (req, res) => {
+app.delete('/users/credentials/:id/attachments/:index', authenticateToken, async (req, res) => {
   try {
     const { id, index } = req.params;
     if (!index) {
@@ -1435,7 +1435,7 @@ app.delete('/api/users/credentials/:id/attachments/:index', authenticateToken, a
 });
 
 // Hourly rate endpoint (simplified - no more rate structure)
-app.put('/api/users/rate-structure', authenticateToken, async (req, res) => {
+app.put('/users/rate-structure', authenticateToken, async (req, res) => {
   try {
     const { hourlyRate } = req.body;
     
@@ -1468,7 +1468,7 @@ app.put('/api/users/rate-structure', authenticateToken, async (req, res) => {
 });
 
 // Work preferences endpoints (now includes industry experience)
-app.put('/api/users/work-preferences', authenticateToken, async (req, res) => {
+app.put('/users/work-preferences', authenticateToken, async (req, res) => {
   try {
     const { industryExperience, ...preferencesData } = req.body;
     
@@ -1549,7 +1549,7 @@ app.put('/api/users/work-preferences', authenticateToken, async (req, res) => {
 });
 
 // Industry experience endpoints
-app.post('/api/users/industry-experience', authenticateToken, async (req, res) => {
+app.post('/users/industry-experience', authenticateToken, async (req, res) => {
   try {
     const { industry, years, description } = req.body;
     
@@ -1578,7 +1578,7 @@ app.post('/api/users/industry-experience', authenticateToken, async (req, res) =
   }
 });
 
-app.put('/api/users/industry-experience/:id', authenticateToken, async (req, res) => {
+app.put('/users/industry-experience/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { industry, years, description } = req.body;
@@ -1595,7 +1595,7 @@ app.put('/api/users/industry-experience/:id', authenticateToken, async (req, res
   }
 });
 
-app.delete('/api/users/industry-experience/:id', authenticateToken, async (req, res) => {
+app.delete('/users/industry-experience/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -1611,7 +1611,7 @@ app.delete('/api/users/industry-experience/:id', authenticateToken, async (req, 
 });
 
 // Availability endpoints
-app.put('/api/users/availability', authenticateToken, async (req, res) => {
+app.put('/users/availability', authenticateToken, async (req, res) => {
   try {
     const { status, hoursPerWeek, startDate } = req.body;
     
@@ -1652,7 +1652,7 @@ app.put('/api/users/availability', authenticateToken, async (req, res) => {
 // ========================================
 
 // PUT /api/users/tax-info - Update GST/HST number and tax exemption status
-app.put('/api/users/tax-info', authenticateToken, async (req, res) => {
+app.put('/users/tax-info', authenticateToken, async (req, res) => {
   try {
     console.log('💰 Update tax info endpoint called', { userId: req.user!.id });
     const { gstHstNumber, taxExempt } = req.body;
@@ -1702,7 +1702,7 @@ app.put('/api/users/tax-info', authenticateToken, async (req, res) => {
 });
 
 // GET /api/tax/provinces - Get all provinces with tax rates
-app.get('/api/tax/provinces', (req, res) => {
+app.get('/tax/provinces', (req, res) => {
   try {
     const provinces = TaxService.getAllProvinces();
     return res.json({ provinces });
@@ -1713,7 +1713,7 @@ app.get('/api/tax/provinces', (req, res) => {
 });
 
 // GET /api/tax/rates/:provinceCode - Get tax rates for a specific province
-app.get('/api/tax/rates/:provinceCode', (req, res) => {
+app.get('/tax/rates/:provinceCode', (req, res) => {
   try {
     const { provinceCode } = req.params;
     const taxRates = TaxService.getTaxRatesByProvince(provinceCode);
@@ -1730,7 +1730,7 @@ app.get('/api/tax/rates/:provinceCode', (req, res) => {
 });
 
 // POST /api/tax/calculate-platform-fee - Calculate platform fees with taxes
-app.post('/api/tax/calculate-platform-fee', authenticateToken, async (req, res) => {
+app.post('/tax/calculate-platform-fee', authenticateToken, async (req, res) => {
   try {
     const { 
       projectAmount, 
@@ -1793,7 +1793,7 @@ app.post('/api/tax/calculate-platform-fee', authenticateToken, async (req, res) 
 });
 
 // POST /api/tax/calculate-project-cost - Calculate total project cost including all fees
-app.post('/api/tax/calculate-project-cost', authenticateToken, async (req, res) => {
+app.post('/tax/calculate-project-cost', authenticateToken, async (req, res) => {
   try {
     const { 
       baseProjectCost,
@@ -1843,7 +1843,7 @@ app.post('/api/tax/calculate-project-cost', authenticateToken, async (req, res) 
 });
 
 // POST /api/tax/validate-gst-hst - Validate GST/HST number format
-app.post('/api/tax/validate-gst-hst', (req, res) => {
+app.post('/tax/validate-gst-hst', (req, res) => {
   try {
     const { gstHstNumber } = req.body;
     
@@ -1875,7 +1875,7 @@ console.log('✅ Tax management endpoints added');
 // ========================================
 
 // GET /api/contracts/:contractId/milestones - Get all milestones for a contract
-app.get('/api/contracts/:contractId/milestones', authenticateToken, async (req, res) => {
+app.get('/contracts/:contractId/milestones', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const userId = req.user!.id;
@@ -1915,7 +1915,7 @@ app.get('/api/contracts/:contractId/milestones', authenticateToken, async (req, 
 });
 
 // GET /api/milestones/:milestoneId/deliverables - Get deliverables for a milestone
-app.get('/api/milestones/:milestoneId/deliverables', authenticateToken, async (req, res) => {
+app.get('/milestones/:milestoneId/deliverables', authenticateToken, async (req, res) => {
   try {
     const { milestoneId } = req.params;
     
@@ -1938,7 +1938,7 @@ app.get('/api/milestones/:milestoneId/deliverables', authenticateToken, async (r
 });
 
 // POST /api/milestones/:milestoneId/deliverables - Create a new deliverable
-app.post('/api/milestones/:milestoneId/deliverables', authenticateToken, async (req, res) => {
+app.post('/milestones/:milestoneId/deliverables', authenticateToken, async (req, res) => {
   try {
     const { milestoneId } = req.params;
     const { title, description, fileUrl } = req.body;
@@ -1964,7 +1964,7 @@ app.post('/api/milestones/:milestoneId/deliverables', authenticateToken, async (
 });
 
 // PUT /api/deliverables/:deliverableId/submit - Submit a deliverable
-app.put('/api/deliverables/:deliverableId/submit', authenticateToken, async (req, res) => {
+app.put('/deliverables/:deliverableId/submit', authenticateToken, async (req, res) => {
   try {
     const { deliverableId } = req.params;
     const userId = req.user!.id;
@@ -1985,7 +1985,7 @@ app.put('/api/deliverables/:deliverableId/submit', authenticateToken, async (req
 });
 
 // PUT /api/deliverables/:deliverableId/review - Approve or reject a deliverable
-app.put('/api/deliverables/:deliverableId/review', authenticateToken, async (req, res) => {
+app.put('/deliverables/:deliverableId/review', authenticateToken, async (req, res) => {
   try {
     const { deliverableId } = req.params;
     const { action, rejectionReason } = req.body;
@@ -2016,7 +2016,7 @@ app.put('/api/deliverables/:deliverableId/review', authenticateToken, async (req
 });
 
 // PUT /api/milestones/:milestoneId/submit - Submit milestone for approval
-app.put('/api/milestones/:milestoneId/submit', authenticateToken, async (req, res) => {
+app.put('/milestones/:milestoneId/submit', authenticateToken, async (req, res) => {
   try {
     const { milestoneId } = req.params;
     const userId = req.user!.id;
@@ -2037,7 +2037,7 @@ app.put('/api/milestones/:milestoneId/submit', authenticateToken, async (req, re
 });
 
 // PUT /api/milestones/:milestoneId/review - Approve or reject a milestone
-app.put('/api/milestones/:milestoneId/review', authenticateToken, async (req, res) => {
+app.put('/milestones/:milestoneId/review', authenticateToken, async (req, res) => {
   try {
     const { milestoneId } = req.params;
     const { action, rejectionReason } = req.body;
@@ -2068,7 +2068,7 @@ app.put('/api/milestones/:milestoneId/review', authenticateToken, async (req, re
 });
 
 // GET /api/contracts/:contractId/time-entries - Get time entries for a contract
-app.get('/api/contracts/:contractId/time-entries', authenticateToken, async (req, res) => {
+app.get('/contracts/:contractId/time-entries', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const userId = req.user!.id;
@@ -2159,7 +2159,7 @@ app.get('/api/contracts/:contractId/time-entries', authenticateToken, async (req
 });
 
 // POST /api/contracts/:contractId/time-entries - Add time entry for hourly projects
-app.post('/api/contracts/:contractId/time-entries', authenticateToken, async (req, res) => {
+app.post('/contracts/:contractId/time-entries', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const { date, hours, hoursWorked, description, milestoneId } = req.body;
@@ -2196,7 +2196,7 @@ app.post('/api/contracts/:contractId/time-entries', authenticateToken, async (re
 });
 
 // PUT /api/time-entries/:timeEntryId - Update time entry
-app.put('/api/time-entries/:timeEntryId', authenticateToken, async (req, res) => {
+app.put('/time-entries/:timeEntryId', authenticateToken, async (req, res) => {
   try {
     const { timeEntryId } = req.params;
     const { date, hours, hoursWorked, description } = req.body;
@@ -2238,7 +2238,7 @@ app.put('/api/time-entries/:timeEntryId', authenticateToken, async (req, res) =>
 });
 
 // DELETE /api/time-entries/:timeEntryId - Delete time entry
-app.delete('/api/time-entries/:timeEntryId', authenticateToken, async (req, res) => {
+app.delete('/time-entries/:timeEntryId', authenticateToken, async (req, res) => {
   try {
     const { timeEntryId } = req.params;
     const userId = req.user!.id;
@@ -2270,7 +2270,7 @@ app.delete('/api/time-entries/:timeEntryId', authenticateToken, async (req, res)
 });
 
 // PUT /api/time-entries/:timeEntryId/approve - Approve time entry
-app.put('/api/time-entries/:timeEntryId/approve', authenticateToken, async (req, res) => {
+app.put('/time-entries/:timeEntryId/approve', authenticateToken, async (req, res) => {
   try {
     const { timeEntryId } = req.params;
     const { feedback } = req.body;
@@ -2297,7 +2297,7 @@ app.put('/api/time-entries/:timeEntryId/approve', authenticateToken, async (req,
 });
 
 // PUT /api/time-entries/:timeEntryId/reject - Reject time entry
-app.put('/api/time-entries/:timeEntryId/reject', authenticateToken, async (req, res) => {
+app.put('/time-entries/:timeEntryId/reject', authenticateToken, async (req, res) => {
   try {
     const { timeEntryId } = req.params;
     const { reason } = req.body;
@@ -2328,7 +2328,7 @@ app.put('/api/time-entries/:timeEntryId/reject', authenticateToken, async (req, 
 });
 
 // PUT /api/time-entries/:timeEntryId/review - Approve or reject time entry
-app.put('/api/time-entries/:timeEntryId/review', authenticateToken, async (req, res) => {
+app.put('/time-entries/:timeEntryId/review', authenticateToken, async (req, res) => {
   try {
     const { timeEntryId } = req.params;
     const { action, rejectionReason } = req.body;
@@ -2359,7 +2359,7 @@ app.put('/api/time-entries/:timeEntryId/review', authenticateToken, async (req, 
 });
 
 // GET /api/contracts/:contractId/payment-period/current - Get current payment period
-app.get('/api/contracts/:contractId/payment-period/current', authenticateToken, async (req, res) => {
+app.get('/contracts/:contractId/payment-period/current', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const userId = req.user!.id;
@@ -2483,7 +2483,7 @@ app.get('/api/contracts/:contractId/payment-period/current', authenticateToken, 
 });
 
 // GET /api/contracts/:contractId/biweekly-summary - Get biweekly payment summary
-app.get('/api/contracts/:contractId/biweekly-summary', authenticateToken, async (req, res) => {
+app.get('/contracts/:contractId/biweekly-summary', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const { periodStart, periodEnd } = req.query;
@@ -2515,7 +2515,7 @@ app.get('/api/contracts/:contractId/biweekly-summary', authenticateToken, async 
 });
 
 // POST /api/contracts/:contractId/payments/biweekly - Process biweekly payment (frontend expects this path)
-app.post('/api/contracts/:contractId/payments/biweekly', authenticateToken, async (req, res) => {
+app.post('/contracts/:contractId/payments/biweekly', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const { periodStart, periodEnd, totalHours, totalAmount, platformFee, taxAmount, netAmount } = req.body;
@@ -2700,7 +2700,7 @@ app.post('/api/contracts/:contractId/payments/biweekly', authenticateToken, asyn
 });
 
 // POST /api/contracts/:contractId/process-biweekly-payment - Process biweekly payment (legacy endpoint)
-app.post('/api/contracts/:contractId/process-biweekly-payment', authenticateToken, async (req, res) => {
+app.post('/contracts/:contractId/process-biweekly-payment', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const { periodStart, periodEnd } = req.body;
@@ -2734,7 +2734,7 @@ console.log('✅ Users routes registered');
 console.log('🔐 Adding Auth routes...');
 
 // POST /api/auth/verify-email - Email verification
-app.post('/api/auth/verify-email', async (req, res) => {
+app.post('/auth/verify-email', async (req, res) => {
   try {
     const { token } = req.body;
     
@@ -2857,7 +2857,7 @@ app.post('/api/auth/verify-email', async (req, res) => {
 });
 
 // POST /api/auth/resend-verification - Resend verification email
-app.post('/api/auth/resend-verification', async (req, res) => {
+app.post('/auth/resend-verification', async (req, res) => {
   try {
     const { email } = req.body;
     
@@ -2941,7 +2941,7 @@ function generateRefreshToken(payload: any): string {
   });
 }
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/auth/login', async (req, res) => {
   try {
     console.log('🔐 Login endpoint hit', { 
       email: req.body?.email, 
@@ -3066,7 +3066,7 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // POST /api/auth/refresh - Refresh access token
-app.post('/api/auth/refresh', async (req, res) => {
+app.post('/auth/refresh', async (req, res) => {
   try {
     const { refreshToken } = req.body;
     
@@ -3108,7 +3108,7 @@ app.post('/api/auth/refresh', async (req, res) => {
 });
 
 // POST /api/auth/logout - Logout (client-side token removal)
-app.post('/api/auth/logout', authenticateToken, async (req, res) => {
+app.post('/auth/logout', authenticateToken, async (req, res) => {
   try {
     logger.info('User logged out', { userId: req.user!.id });
     return res.json({ message: 'Logged out successfully' });
@@ -3118,7 +3118,7 @@ app.post('/api/auth/logout', authenticateToken, async (req, res) => {
 });
 
 // POST /api/auth/register - User registration
-app.post('/api/auth/register', async (req, res) => {
+app.post('/auth/register', async (req, res) => {
   try {
     logger.info('Registration attempt', { 
       email: req.body.email, 
@@ -3232,7 +3232,7 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // GET /api/users/:userId/public-profile - Get public talent profile (no auth required)
-app.get('/api/users/:userId/public-profile', async (req, res) => {
+app.get('/users/:userId/public-profile', async (req, res) => {
   try {
     const { userId } = req.params;
     
@@ -3383,7 +3383,7 @@ app.get('/api/users/:userId/public-profile', async (req, res) => {
 });
 
 // GET /api/auth/check - Check authentication status
-app.get('/api/auth/check', async (req, res) => {
+app.get('/auth/check', async (req, res) => {
   try {
     logger.info('Auth check request received', { ip: req.ip });
     const authHeader = req.headers.authorization;
@@ -3462,7 +3462,7 @@ app.get('/api/auth/check', async (req, res) => {
 });
 
 // POST /api/auth/forgot-password - Request password reset
-app.post('/api/auth/forgot-password', async (req, res) => {
+app.post('/auth/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
     
@@ -3515,7 +3515,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 });
 
 // POST /api/auth/reset-password - Reset password with token
-app.post('/api/auth/reset-password', async (req, res) => {
+app.post('/auth/reset-password', async (req, res) => {
   try {
     const { token, newPassword } = req.body;
     
@@ -3809,7 +3809,7 @@ console.log('✅ Non-prefixed auth routes registered');
 
 // Projects routes - with real database integration
 console.log('📋 Adding Projects routes...');
-app.get('/api/projects', async (req, res) => {
+app.get('/projects', async (req, res) => {
   try {
     console.log('📋 Projects endpoint called');
     
@@ -3868,7 +3868,7 @@ console.log('✅ Projects route registered');
 
 // Applications routes - moved outside async function
 console.log('📝 Adding Applications routes...');
-app.get('/api/applications', async (req, res) => {
+app.get('/applications', async (req, res) => {
   try {
     console.log('📝 Applications endpoint called');
     // Mock applications data
@@ -3899,7 +3899,7 @@ console.log('🔍 DEBUG: About to register messages routes...');
 console.log('🔍 DEBUG: Messages routes temporarily disabled for debugging...');
 
 // GET /api/messages/conversations - Get user's conversations (contract-based and application-based)
-app.get('/api/messages/conversations', authenticateToken, async (req, res) => {
+app.get('/messages/conversations', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     console.log('💬 Get conversations endpoint called for user:', userId);
@@ -4283,7 +4283,7 @@ app.get('/api/messages/conversations', authenticateToken, async (req, res) => {
 
 
 // GET /api/users/:userId/portfolio - Get user's portfolio items
-app.get('/api/users/:userId/portfolio', async (req, res) => {
+app.get('/users/:userId/portfolio', async (req, res) => {
   try {
     const { userId } = req.params;
     console.log(`📁 Portfolio endpoint called for user: ${userId}`);
@@ -4307,7 +4307,7 @@ app.get('/api/users/:userId/portfolio', async (req, res) => {
 
 
 // GET /api/applications/portfolio-items - Get user's portfolio items for application
-app.get('/api/applications/portfolio-items', authenticateToken, async (req, res) => {
+app.get('/applications/portfolio-items', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     
@@ -4331,7 +4331,7 @@ app.get('/api/applications/portfolio-items', authenticateToken, async (req, res)
 
 
 // POST /api/applications - Create new application (with portfolio)
-app.post('/api/applications', authenticateToken, deliverableUpload.array('attachments', 5), async (req, res) => {
+app.post('/applications', authenticateToken, deliverableUpload.array('attachments', 5), async (req, res) => {
   try {
     console.log('📝 Application submission received');
     console.log('📋 Request body keys:', Object.keys(req.body));
@@ -4658,7 +4658,7 @@ app.use('/api/projects', (req, res, next) => {
 });
 
 // POST /api/projects - Create project
-app.post('/api/projects', authenticateToken, requireBusiness, projectAttachmentUpload.array('attachments', 5), async (req, res) => {
+app.post('/projects', authenticateToken, requireBusiness, projectAttachmentUpload.array('attachments', 5), async (req, res) => {
   try {
     const userId = req.user!.id;
     console.log('🚀 === PROJECT CREATION ENDPOINT CALLED ===');
@@ -4892,7 +4892,7 @@ console.log('✅ Critical missing endpoints added successfully!');
 console.log('📁 Adding missing CRUD operations...');
 
 // POST /api/users/portfolio - Add portfolio item
-app.post('/api/users/portfolio', authenticateToken, requireTalent, async (req, res) => {
+app.post('/users/portfolio', authenticateToken, requireTalent, async (req, res) => {
   try {
     logger.info('Add portfolio item endpoint called', { userId: req.user!.id });
     const { title, description, technologies, imageUrl, projectUrl } = req.body;
@@ -4936,7 +4936,7 @@ app.post('/api/users/portfolio', authenticateToken, requireTalent, async (req, r
 
 
 // PUT /api/users/portfolio/:itemId - Update portfolio item
-app.put('/api/users/portfolio/:itemId', authenticateToken, requireTalent, async (req, res) => {
+app.put('/users/portfolio/:itemId', authenticateToken, requireTalent, async (req, res) => {
   try {
     const { itemId } = req.params;
     logger.info('Update portfolio item endpoint called', { userId: req.user!.id, itemId });
@@ -5012,7 +5012,7 @@ app.put('/api/users/portfolio/:itemId', authenticateToken, requireTalent, async 
 });
 
 // DELETE /api/users/portfolio/:itemId - Delete portfolio item
-app.delete('/api/users/portfolio/:itemId', authenticateToken, requireTalent, async (req, res) => {
+app.delete('/users/portfolio/:itemId', authenticateToken, requireTalent, async (req, res) => {
   try {
     const { itemId } = req.params;
     logger.info('Delete portfolio item endpoint called', { userId: req.user!.id, itemId });
@@ -5064,7 +5064,7 @@ console.log('✅ Portfolio CRUD operations added!');
 console.log('🚀 Adding business logic endpoints...');
 
 // POST /api/projects/:projectId/applications - Apply to specific project
-app.post('/api/projects/:projectId/applications', authenticateToken, requireTalent, async (req, res) => {
+app.post('/projects/:projectId/applications', authenticateToken, requireTalent, async (req, res) => {
   try {
     const { projectId } = req.params;
     logger.info('Apply to project endpoint called', { userId: req.user!.id, projectId });
@@ -5155,7 +5155,7 @@ app.post('/api/projects/:projectId/applications', authenticateToken, requireTale
 });
 
 // GET /api/projects/:projectId/applications - Get project applications (Business)
-app.get('/api/projects/:projectId/applications', authenticateToken, requireBusiness, async (req, res) => {
+app.get('/projects/:projectId/applications', authenticateToken, requireBusiness, async (req, res) => {
   try {
     const { projectId } = req.params;
     logger.info('Get project applications endpoint called', { userId: req.user!.id, projectId });
@@ -5278,7 +5278,7 @@ app.get('/api/projects/:projectId/applications', authenticateToken, requireBusin
 });
 
 // GET /api/search/global - Global search across platform
-app.get('/api/search/global', authenticateToken, requireUser, async (req, res) => {
+app.get('/search/global', authenticateToken, requireUser, async (req, res) => {
   try {
     const { q, type, limit = 20 } = req.query;
     logger.info('Global search endpoint called', { userId: req.user!.id, query: q, type });
@@ -5381,7 +5381,7 @@ app.get('/api/search/global', authenticateToken, requireUser, async (req, res) =
 });
 
 // POST /api/files/upload - File upload endpoint
-app.post('/api/files/upload', authenticateToken, requireUser, async (req, res) => {
+app.post('/files/upload', authenticateToken, requireUser, async (req, res) => {
   try {
     logger.info('File upload endpoint called', { userId: req.user!.id });
     
@@ -5421,7 +5421,7 @@ console.log('✅ Business logic endpoints added!');
 console.log('📝 Adding Applications module endpoints...');
 
 // GET /api/applications/my - Get my applications (Talent)
-app.get('/api/applications/my', authenticateToken, requireTalent, async (req, res) => {
+app.get('/applications/my', authenticateToken, requireTalent, async (req, res) => {
   try {
     logger.info('Get my applications endpoint called', { userId: req.user!.id });
     
@@ -5505,7 +5505,7 @@ app.get('/api/applications/my', authenticateToken, requireTalent, async (req, re
 });
 
 // GET /api/applications/business - Get business applications
-app.get('/api/applications/business', authenticateToken, requireBusiness, async (req, res) => {
+app.get('/applications/business', authenticateToken, requireBusiness, async (req, res) => {
   try {
     logger.info('Get business applications endpoint called', { userId: req.user!.id });
     
@@ -5572,7 +5572,7 @@ app.get('/api/applications/business', authenticateToken, requireBusiness, async 
 });
 
 // GET /api/applications/:applicationId - Get specific application
-app.get('/api/applications/:applicationId', authenticateToken, async (req, res) => {
+app.get('/applications/:applicationId', authenticateToken, async (req, res) => {
   try {
     const { applicationId } = req.params;
     logger.info('Get specific application endpoint called', { 
@@ -5768,7 +5768,7 @@ app.get('/api/applications/:applicationId', authenticateToken, async (req, res) 
 });
 
 // PUT /api/applications/:applicationId/status - Update application status (Business)
-app.put('/api/applications/:applicationId/status', authenticateToken, requireBusiness, async (req, res) => {
+app.put('/applications/:applicationId/status', authenticateToken, requireBusiness, async (req, res) => {
   try {
     const { applicationId } = req.params;
     const { status, notes, metadata } = req.body;
@@ -5931,7 +5931,7 @@ app.put('/api/applications/:applicationId/status', authenticateToken, requireBus
 });
 
 // PUT /api/applications/:applicationId - Update application
-app.put('/api/applications/:applicationId', async (req, res) => {
+app.put('/applications/:applicationId', async (req, res) => {
   try {
     const { applicationId } = req.params;
     console.log(`📝 Update application endpoint called: ${applicationId}`);
@@ -5963,7 +5963,7 @@ app.put('/api/applications/:applicationId', async (req, res) => {
 });
 
 // POST /api/applications/:applicationId/withdraw - Withdraw application
-app.post('/api/applications/:applicationId/withdraw', async (req, res) => {
+app.post('/applications/:applicationId/withdraw', async (req, res) => {
   try {
     const { applicationId } = req.params;
     console.log(`📝 Withdraw application endpoint called: ${applicationId}`);
@@ -6033,7 +6033,7 @@ console.log('✅ Applications module endpoints added!');
 console.log('📋 Adding Projects module endpoints...');
 
 // GET /api/projects/my/projects - Get my projects (Business)
-app.get('/api/projects/my/projects', authenticateToken, requireBusiness, async (req, res) => {
+app.get('/projects/my/projects', authenticateToken, requireBusiness, async (req, res) => {
   try {
     const userId = req.user!.id;
     console.log('📋 Get my projects endpoint called for user:', userId);
@@ -6072,7 +6072,7 @@ app.get('/api/projects/my/projects', authenticateToken, requireBusiness, async (
 });
 
 // GET /api/projects/:projectId - Get single project (requires authentication)
-app.get('/api/projects/:projectId', authenticateToken, async (req, res) => {
+app.get('/projects/:projectId', authenticateToken, async (req, res) => {
   try {
     const { projectId } = req.params;
     console.log(`📋 Get project endpoint called: ${projectId}`);
@@ -6151,7 +6151,7 @@ app.get('/api/projects/:projectId', authenticateToken, async (req, res) => {
 });
 
 // PUT /api/projects/:projectId - Update project
-app.put('/api/projects/:projectId', authenticateToken, async (req, res) => {
+app.put('/projects/:projectId', authenticateToken, async (req, res) => {
   try {
     const { projectId } = req.params;
     if (!projectId) {
@@ -6364,7 +6364,7 @@ app.put('/api/projects/:projectId', authenticateToken, async (req, res) => {
 });
 
 // DELETE /api/projects/:projectId - Delete project
-app.delete('/api/projects/:projectId', async (req, res) => {
+app.delete('/projects/:projectId', async (req, res) => {
   try {
     const { projectId } = req.params;
     console.log(`📋 Delete project endpoint called: ${projectId}`);
@@ -6380,7 +6380,7 @@ app.delete('/api/projects/:projectId', async (req, res) => {
 });
 
 // POST /api/projects/:projectId/publish - Publish project
-app.post('/api/projects/:projectId/publish', async (req, res) => {
+app.post('/projects/:projectId/publish', async (req, res) => {
   try {
     const { projectId } = req.params;
     console.log(`📋 Publish project endpoint called: ${projectId}`);
@@ -6415,7 +6415,7 @@ app.post('/api/projects/:projectId/publish', async (req, res) => {
 
 /*
 // GET /api/projects/search - Search projects
-app.get('/api/projects/search', async (req, res) => {
+app.get('/projects/search', async (req, res) => {
   try {
     const { q, skills, type, budget } = req.query;
     console.log(`📋 Search projects endpoint called: ${q}`);
@@ -6440,7 +6440,7 @@ app.get('/api/projects/search', async (req, res) => {
 */
 console.log('✅ Projects module endpoints added!');
 
-app.get('/api/users/dashboard', authenticateToken, async (req, res) => {
+app.get('/users/dashboard', authenticateToken, async (req, res) => {
   try {
     console.log('👤 Dashboard endpoint called', { userId: req.user!.id });
     // Get user with comprehensive dashboard data from database
@@ -6576,7 +6576,7 @@ app.get('/api/users/dashboard', authenticateToken, async (req, res) => {
 });
 
 // GET /api/users/profile/completion - Profile completion check
-app.get('/api/users/profile/completion', async (req, res) => {
+app.get('/users/profile/completion', async (req, res) => {
   try {
     console.log('👥 Profile completion check endpoint called');
     
@@ -6658,7 +6658,7 @@ app.get('/api/users/profile/completion', async (req, res) => {
   }
 });
 // PUT /api/users/location - Update user location
-app.put('/api/users/location', authenticateToken, async (req, res) => {
+app.put('/users/location', authenticateToken, async (req, res) => {
   try {
     console.log('👥 Update location endpoint called');
     console.log('Request body:', req.body);
@@ -6709,7 +6709,7 @@ app.put('/api/users/location', authenticateToken, async (req, res) => {
 });
 
 // PUT /api/users/skills - Update user skills (new format)
-app.put('/api/users/skills', authenticateToken, async (req, res) => {
+app.put('/users/skills', authenticateToken, async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -6831,7 +6831,7 @@ app.put('/api/users/skills', authenticateToken, async (req, res) => {
 });
 
 // PUT /api/users/skills/batch - Update skills by category
-app.put('/api/users/skills/batch', authenticateToken, async (req, res) => {
+app.put('/users/skills/batch', authenticateToken, async (req, res) => {
   try {
     console.log('👥 Batch update skills endpoint called', { userId: req.user!.id });
     const { category, skills } = req.body;
@@ -6891,7 +6891,7 @@ app.put('/api/users/skills/batch', authenticateToken, async (req, res) => {
 });
 
 // POST /api/users/skills - Add skill
-app.post('/api/users/skills', authenticateToken, async (req, res) => {
+app.post('/users/skills', authenticateToken, async (req, res) => {
   try {
     console.log('👥 Add skill endpoint called', { userId: req.user!.id });
     const { skillName, level, experience } = req.body;
@@ -6942,7 +6942,7 @@ app.post('/api/users/skills', authenticateToken, async (req, res) => {
 });
 
 // PUT /api/users/skills/:userSkillId - Update skill
-app.put('/api/users/skills/:userSkillId', authenticateToken, async (req, res) => {
+app.put('/users/skills/:userSkillId', authenticateToken, async (req, res) => {
   try {
     const { userSkillId } = req.params;
     const { level, experience } = req.body;
@@ -6968,7 +6968,7 @@ app.put('/api/users/skills/:userSkillId', authenticateToken, async (req, res) =>
 });
 
 // DELETE /api/users/skills/:userSkillId - Remove skill
-app.delete('/api/users/skills/:userSkillId', authenticateToken, async (req, res) => {
+app.delete('/users/skills/:userSkillId', authenticateToken, async (req, res) => {
   try {
     const { userSkillId } = req.params;
     console.log(`👥 Remove skill endpoint called: ${userSkillId}`);
@@ -6990,7 +6990,7 @@ app.delete('/api/users/skills/:userSkillId', authenticateToken, async (req, res)
 });
 
 // DELETE /api/users/skills/:userSkillId - Remove skill
-app.delete('/api/users/skills/:userSkillId', authenticateToken, async (req, res) => {
+app.delete('/users/skills/:userSkillId', authenticateToken, async (req, res) => {
   try {
     console.log('🗑️ Remove skill endpoint called', { 
       userId: req.user!.id, 
@@ -7038,7 +7038,7 @@ app.delete('/api/users/skills/:userSkillId', authenticateToken, async (req, res)
 });
 
 // GET /api/skills - Get all available skills
-app.get('/api/skills', async (req, res) => {
+app.get('/skills', async (req, res) => {
   try {
     console.log('📋 Skills endpoint called');
     
@@ -7086,7 +7086,7 @@ app.get('/api/skills', async (req, res) => {
 });
 
 // POST /api/users/avatar - Upload avatar
-app.post('/api/users/avatar', authenticateToken, avatarUpload.single('avatar'), async (req, res) => {
+app.post('/users/avatar', authenticateToken, avatarUpload.single('avatar'), async (req, res) => {
   try {
     console.log('👥 Upload avatar endpoint called', { 
       userId: req.user!.id,
@@ -7137,7 +7137,7 @@ app.post('/api/users/avatar', authenticateToken, avatarUpload.single('avatar'), 
 });
 
 // POST /api/users/portfolio/upload-image - Upload portfolio image
-app.post('/api/users/portfolio/upload-image', authenticateToken, portfolioImageUpload.single('image'), async (req, res) => {
+app.post('/users/portfolio/upload-image', authenticateToken, portfolioImageUpload.single('image'), async (req, res) => {
   try {
     console.log('📸 Portfolio image upload endpoint called', { userId: req.user!.id });
     
@@ -7170,7 +7170,7 @@ app.post('/api/users/portfolio/upload-image', authenticateToken, portfolioImageU
 });
 
 // GET /api/users/search - Search users
-app.get('/api/users/search', async (req, res) => {
+app.get('/users/search', async (req, res) => {
   try {
     const { q } = req.query;
     console.log(`👥 Search users endpoint called: ${q}`);
@@ -7204,7 +7204,7 @@ console.log('✅ Users module endpoints added!');
 // NotificationService already imported at top of file
 
 // GET /api/notifications - Get user notifications
-app.get('/api/notifications', authenticateToken, async (req, res) => {
+app.get('/notifications', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { unreadOnly } = req.query;
@@ -7222,7 +7222,7 @@ app.get('/api/notifications', authenticateToken, async (req, res) => {
 });
 
 // GET /api/notifications/unread-count - Get unread notification count
-app.get('/api/notifications/unread-count', authenticateToken, async (req, res) => {
+app.get('/notifications/unread-count', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const count = await NotificationService.getUnreadCount(userId);
@@ -7234,7 +7234,7 @@ app.get('/api/notifications/unread-count', authenticateToken, async (req, res) =
   }
 });
 // PUT /api/notifications/:notificationId/read - Mark notification as read
-app.put('/api/notifications/:notificationId/read', authenticateToken, async (req, res) => {
+app.put('/notifications/:notificationId/read', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { notificationId } = req.params;
@@ -7253,7 +7253,7 @@ app.put('/api/notifications/:notificationId/read', authenticateToken, async (req
 });
 
 // PUT /api/notifications/mark-all-read - Mark all notifications as read
-app.put('/api/notifications/mark-all-read', authenticateToken, async (req, res) => {
+app.put('/notifications/mark-all-read', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     
@@ -7267,7 +7267,7 @@ app.put('/api/notifications/mark-all-read', authenticateToken, async (req, res) 
 });
 
 // DELETE /api/notifications/:notificationId - Delete notification
-app.delete('/api/notifications/:notificationId', authenticateToken, async (req, res) => {
+app.delete('/notifications/:notificationId', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { notificationId } = req.params;
@@ -7293,7 +7293,7 @@ console.log('✅ Notification endpoints added!');
 console.log('💳 Adding Payments module endpoints...');
 
 // POST /api/payments/intent - Create payment intent
-app.post('/api/payments/intent', async (req, res) => {
+app.post('/payments/intent', async (req, res) => {
   try {
     console.log('💳 Create payment intent endpoint called');
     const { amount, currency, projectId } = req.body;
@@ -7314,7 +7314,7 @@ app.post('/api/payments/intent', async (req, res) => {
 });
 
 // POST /api/payments/connect/account - Create Stripe Connect account
-app.post('/api/payments/connect/account', authenticateToken, async (req, res) => {
+app.post('/payments/connect/account', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { type, country } = req.body;
@@ -7379,7 +7379,7 @@ app.post('/api/payments/connect/account', authenticateToken, async (req, res) =>
 });
 
 // GET /api/payments/connect/status - Check Stripe Connect account status
-app.get('/api/payments/connect/status', authenticateToken, async (req, res) => {
+app.get('/payments/connect/status', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     
@@ -7423,7 +7423,7 @@ app.get('/api/payments/connect/status', authenticateToken, async (req, res) => {
 });
 
 // POST /api/payments/connect/account/:accountId/link - Generate new account link for onboarding
-app.post('/api/payments/connect/account/:accountId/link', authenticateToken, async (req, res) => {
+app.post('/payments/connect/account/:accountId/link', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { accountId } = req.params;
@@ -7462,7 +7462,7 @@ app.post('/api/payments/connect/account/:accountId/link', authenticateToken, asy
 });
 
 // POST /api/contracts/:contractId/escrow/confirm-payment - Confirm payment and update escrow status
-app.post('/api/contracts/:contractId/escrow/confirm-payment', authenticateToken, async (req, res) => {
+app.post('/contracts/:contractId/escrow/confirm-payment', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const { paymentIntentId } = req.body;
@@ -7576,7 +7576,7 @@ app.post('/api/contracts/:contractId/escrow/confirm-payment', authenticateToken,
 });
 
 // GET /api/payments/history - Get payment history
-app.get('/api/payments/history', authenticateToken, async (req, res) => {
+app.get('/payments/history', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id; // Get from JWT token
     
@@ -7645,7 +7645,7 @@ app.get('/api/payments/history', authenticateToken, async (req, res) => {
 });
 
 // GET /api/payments/earnings - Get talent earnings
-app.get('/api/payments/earnings', authenticateToken, async (req, res) => {
+app.get('/payments/earnings', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const userType = req.user!.userType;
@@ -7784,7 +7784,7 @@ app.get('/api/payments/earnings', authenticateToken, async (req, res) => {
 });
 
 // POST /api/payments/withdraw - Withdraw funds from Stripe Connect account
-app.post('/api/payments/withdraw', authenticateToken, async (req, res) => {
+app.post('/payments/withdraw', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const userType = req.user!.userType;
@@ -7906,7 +7906,7 @@ app.post('/api/payments/withdraw', authenticateToken, async (req, res) => {
 });
 
 // GET /api/payments/stats - Get payment statistics
-app.get('/api/payments/stats', authenticateToken, async (req, res) => {
+app.get('/payments/stats', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { dateFrom, dateTo } = req.query;
@@ -8053,7 +8053,7 @@ app.get('/api/payments/stats', authenticateToken, async (req, res) => {
 });
 
 // GET /api/payments/:paymentId/receipt/download - Download payment receipt
-app.get('/api/payments/:paymentId/receipt/download', authenticateToken, async (req, res) => {
+app.get('/payments/:paymentId/receipt/download', authenticateToken, async (req, res) => {
   try {
     const { paymentId } = req.params;
     const { format = 'pdf' } = req.query;
@@ -8177,7 +8177,7 @@ For questions, contact: support@localtalents.ca
 // GET /api/payments/:paymentId - Get single payment
 // COMMENTED OUT: Blocking modular paymentsRoutes - modular routes handle this endpoint
 /*
-app.get('/api/payments/:paymentId', async (req, res) => {
+app.get('/payments/:paymentId', async (req, res) => {
   try {
     const { paymentId } = req.params;
     console.log(`💳 Get payment endpoint called: ${paymentId}`);
@@ -8245,7 +8245,7 @@ app.get('/api/payments/:paymentId', async (req, res) => {
 */
 
 // POST /api/payments/escrow/fund - Fund escrow
-app.post('/api/payments/escrow/fund', async (req, res) => {
+app.post('/payments/escrow/fund', async (req, res) => {
   try {
     console.log('💳 Fund escrow endpoint called');
     const { projectId, amount, milestones } = req.body;
@@ -8265,7 +8265,7 @@ app.post('/api/payments/escrow/fund', async (req, res) => {
 });
 
 // POST /api/payments/milestone/release - Release milestone payment
-app.post('/api/payments/milestone/release', authenticateToken, async (req, res) => {
+app.post('/payments/milestone/release', authenticateToken, async (req, res) => {
   try {
     console.log('💳 Release milestone payment endpoint called');
     const { milestoneId } = req.body;
@@ -8462,7 +8462,7 @@ app.post('/api/payments/milestone/release', authenticateToken, async (req, res) 
 
 
 // GET /api/payments/calculate-fees - Calculate payment fees
-app.get('/api/payments/calculate-fees', async (req, res) => {
+app.get('/payments/calculate-fees', async (req, res) => {
   try {
     const { amount } = req.query;
     console.log(`💳 Calculate fees endpoint called: ${amount}`);
@@ -8489,7 +8489,7 @@ console.log('✅ Payments module endpoints added!');
 // ========================================
 
 // POST /api/contracts/:contractId/milestones/:milestoneId/approve - Approve milestone completion
-app.post('/api/contracts/:contractId/milestones/:milestoneId/approve', authenticateToken, async (req, res) => {
+app.post('/contracts/:contractId/milestones/:milestoneId/approve', authenticateToken, async (req, res) => {
   try {
     const { contractId, milestoneId } = req.params;
     const userId = req.user!.id;
@@ -8652,7 +8652,7 @@ app.post('/api/contracts/:contractId/milestones/:milestoneId/approve', authentic
 });
 
 // POST /api/contracts/:contractId/milestones/:milestoneId/reject - Reject milestone completion
-app.post('/api/contracts/:contractId/milestones/:milestoneId/reject', authenticateToken, async (req, res) => {
+app.post('/contracts/:contractId/milestones/:milestoneId/reject', authenticateToken, async (req, res) => {
   try {
     const { contractId, milestoneId } = req.params;
     const userId = req.user!.id;
@@ -8724,7 +8724,7 @@ app.post('/api/contracts/:contractId/milestones/:milestoneId/reject', authentica
 });
 
 // GET /api/contracts/:contractId/milestones - Get contract milestones
-app.get('/api/contracts/:contractId/milestones', authenticateToken, async (req, res) => {
+app.get('/contracts/:contractId/milestones', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const userId = req.user!.id;
@@ -8762,7 +8762,7 @@ app.get('/api/contracts/:contractId/milestones', authenticateToken, async (req, 
 // ========================================
 
 // GET /api/milestones/:milestoneId/deliverables - Get all deliverables for a milestone
-app.get('/api/milestones/:milestoneId/deliverables', authenticateToken, async (req, res) => {
+app.get('/milestones/:milestoneId/deliverables', authenticateToken, async (req, res) => {
   try {
     const { milestoneId } = req.params;
     const userId = req.user!.id;
@@ -8801,7 +8801,7 @@ app.get('/api/milestones/:milestoneId/deliverables', authenticateToken, async (r
 });
 
 // POST /api/milestones/:milestoneId/deliverables - Create a new deliverable
-app.post('/api/milestones/:milestoneId/deliverables', authenticateToken, async (req, res) => {
+app.post('/milestones/:milestoneId/deliverables', authenticateToken, async (req, res) => {
   try {
     const { milestoneId } = req.params;
     const { title, description, fileUrl } = req.body;
@@ -8850,7 +8850,7 @@ app.post('/api/milestones/:milestoneId/deliverables', authenticateToken, async (
 });
 
 // PUT /api/deliverables/:deliverableId/submit - Submit deliverable for review
-app.put('/api/deliverables/:deliverableId/submit', authenticateToken, async (req, res) => {
+app.put('/deliverables/:deliverableId/submit', authenticateToken, async (req, res) => {
   try {
     const { deliverableId } = req.params;
     const userId = req.user!.id;
@@ -8936,7 +8936,7 @@ app.put('/api/deliverables/:deliverableId/submit', authenticateToken, async (req
 });
 
 // PUT /api/deliverables/:deliverableId/review - Approve or reject deliverable
-app.put('/api/deliverables/:deliverableId/review', authenticateToken, async (req, res) => {
+app.put('/deliverables/:deliverableId/review', authenticateToken, async (req, res) => {
   try {
     const { deliverableId } = req.params;
     const { action, rejectionReason } = req.body;
@@ -9024,7 +9024,7 @@ app.put('/api/deliverables/:deliverableId/review', authenticateToken, async (req
 });
 
 // POST /api/milestones/:milestoneId/sync-status - Manually sync milestone status based on deliverables
-app.post('/api/milestones/:milestoneId/sync-status', authenticateToken, async (req, res) => {
+app.post('/milestones/:milestoneId/sync-status', authenticateToken, async (req, res) => {
   try {
     const { milestoneId } = req.params;
     const userId = req.user!.id;
@@ -9107,7 +9107,7 @@ app.post('/api/milestones/:milestoneId/sync-status', authenticateToken, async (r
 });
 
 // POST /api/milestones/:milestoneId/release-payment - Release escrow payment for milestone
-app.post('/api/milestones/:milestoneId/release-payment', authenticateToken, async (req, res) => {
+app.post('/milestones/:milestoneId/release-payment', authenticateToken, async (req, res) => {
   try {
     const { milestoneId } = req.params;
     const userId = req.user!.id;
@@ -9283,7 +9283,7 @@ app.post('/api/milestones/:milestoneId/release-payment', authenticateToken, asyn
 });
 
 // POST /api/upload/deliverable - Upload deliverable attachment
-app.post('/api/upload/deliverable', authenticateToken, deliverableUpload.single('file'), async (req, res) => {
+app.post('/upload/deliverable', authenticateToken, deliverableUpload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -9310,7 +9310,7 @@ app.post('/api/upload/deliverable', authenticateToken, deliverableUpload.single(
 // ========================================
 
 // POST /api/contracts/:contractId/escrow/fund - Create escrow account and initiate Stripe payment
-app.post('/api/contracts/:contractId/escrow/fund', authenticateToken, async (req, res) => {
+app.post('/contracts/:contractId/escrow/fund', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const { estimatedHours } = req.body; // For hourly projects
@@ -9674,7 +9674,7 @@ app.post('/api/contracts/:contractId/escrow/fund', authenticateToken, async (req
 
 
 // GET /api/contracts/:contractId/escrow/status - Get escrow account status
-app.get('/api/contracts/:contractId/escrow/status', authenticateToken, async (req, res) => {
+app.get('/contracts/:contractId/escrow/status', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const userId = req.user!.id;
@@ -9729,7 +9729,7 @@ app.get('/api/contracts/:contractId/escrow/status', authenticateToken, async (re
 });
 
 // POST /api/webhooks/stripe/test - Test webhook by simulating payment success
-app.post('/api/webhooks/stripe/test', async (req, res) => {
+app.post('/webhooks/stripe/test', async (req, res) => {
   try {
     const { paymentIntentId, contractId, amount } = req.body;
     
@@ -9769,7 +9769,7 @@ app.post('/api/webhooks/stripe/test', async (req, res) => {
 });
 
 // GET /api/webhooks/stripe/test - Test webhook configuration
-app.get('/api/webhooks/stripe/test', (req, res) => {
+app.get('/webhooks/stripe/test', (req, res) => {
   try {
     const config = {
       webhookSecretConfigured: !!process.env['STRIPE_WEBHOOK_SECRET'],
@@ -9794,7 +9794,7 @@ app.get('/api/webhooks/stripe/test', (req, res) => {
 console.log('💬 Adding Messages module endpoints...');
 
 // POST /api/contracts - Create new contract
-app.post('/api/contracts', authenticateToken, async (req, res) => {
+app.post('/contracts', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const {
@@ -10025,7 +10025,7 @@ app.post('/api/contracts', authenticateToken, async (req, res) => {
 });
 
 // GET /api/contracts - Get contracts for current user
-app.get('/api/contracts', authenticateToken, async (req, res) => {
+app.get('/contracts', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const userType = req.user!.userType;
@@ -10151,7 +10151,7 @@ app.get('/api/contracts', authenticateToken, async (req, res) => {
 });
 
 // GET /api/contracts/:contractId - Get specific contract details
-app.get('/api/contracts/:contractId', authenticateToken, async (req, res) => {
+app.get('/contracts/:contractId', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const userId = req.user!.id;
@@ -10256,7 +10256,7 @@ app.get('/api/contracts/:contractId', authenticateToken, async (req, res) => {
 });
 
 // GET /api/applications/:applicationId/contract - Check if contract exists for application
-app.get('/api/applications/:applicationId/contract', authenticateToken, async (req, res) => {
+app.get('/applications/:applicationId/contract', authenticateToken, async (req, res) => {
   try {
     const { applicationId } = req.params;
     const userId = req.user!.id;
@@ -10306,7 +10306,7 @@ app.get('/api/applications/:applicationId/contract', authenticateToken, async (r
 });
 
 // POST /api/contracts/:contractId/sign - Sign a contract
-app.post('/api/contracts/:contractId/sign', authenticateToken, async (req, res) => {
+app.post('/contracts/:contractId/sign', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const userId = req.user!.id;
@@ -10573,7 +10573,7 @@ app.post('/api/contracts/:contractId/sign', authenticateToken, async (req, res) 
 });
 
 // PUT /api/contracts/:contractId/status - Update contract status (e.g., start project)
-app.put('/api/contracts/:contractId/status', authenticateToken, async (req, res) => {
+app.put('/contracts/:contractId/status', authenticateToken, async (req, res) => {
   try {
     const { contractId } = req.params;
     const userId = req.user!.id;
@@ -10618,7 +10618,7 @@ app.put('/api/contracts/:contractId/status', authenticateToken, async (req, res)
 });
 
 // POST /api/messages/conversations/find-or-create - Find existing or create new conversation
-app.post('/api/messages/conversations/find-or-create', authenticateToken, async (req, res) => {
+app.post('/messages/conversations/find-or-create', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { participantIds, projectId } = req.body;
@@ -10661,7 +10661,7 @@ app.post('/api/messages/conversations/find-or-create', authenticateToken, async 
 });
 
 // POST /api/messages/conversations/:conversationId/messages - Send message in conversation (contract)
-app.post('/api/messages/conversations/:conversationId/messages', authenticateToken, async (req, res) => {
+app.post('/messages/conversations/:conversationId/messages', authenticateToken, async (req, res) => {
   try {
     const { conversationId } = req.params;
     const userId = req.user!.id;
@@ -10796,7 +10796,7 @@ app.post('/api/messages/conversations/:conversationId/messages', authenticateTok
 });
 
 // GET /api/messages/conversations/:conversationId/messages - Get messages in conversation (contract or application)
-app.get('/api/messages/conversations/:conversationId/messages', authenticateToken, async (req, res) => {
+app.get('/messages/conversations/:conversationId/messages', authenticateToken, async (req, res) => {
   try {
     const { conversationId } = req.params;
     const userId = req.user!.id;
@@ -10966,7 +10966,7 @@ app.patch('/api/messages/:messageId/read', async (req, res) => {
 });
 
 // DELETE /api/messages/:messageId - Delete message
-app.delete('/api/messages/:messageId', async (req, res) => {
+app.delete('/messages/:messageId', async (req, res) => {
   try {
     const { messageId } = req.params;
     console.log(`💬 Delete message endpoint called: ${messageId}`);
@@ -10982,7 +10982,7 @@ app.delete('/api/messages/:messageId', async (req, res) => {
 });
 
 // GET /api/messages/stats - Get message statistics
-app.get('/api/messages/stats', authenticateToken, async (req, res) => {
+app.get('/messages/stats', authenticateToken, async (req, res) => {
   try {
     const userId = req.user!.id;
     console.log(`💬 Get message stats endpoint called for user: ${userId}`);
@@ -11051,7 +11051,7 @@ app.get('/api/messages/stats', authenticateToken, async (req, res) => {
 });
 
 // POST /api/messages/conversations/:conversationId/read - Mark messages as read
-app.post('/api/messages/conversations/:conversationId/read', authenticateToken, async (req, res) => {
+app.post('/messages/conversations/:conversationId/read', authenticateToken, async (req, res) => {
   try {
     const { conversationId } = req.params;
     const userId = req.user!.id;
@@ -11151,7 +11151,7 @@ console.log('✅ Messages module endpoints added!');
 console.log('🌟 Adding Matching module endpoints...');
 
 // GET /api/matching/project/:projectId/talent - Find talent for project
-app.get('/api/matching/project/:projectId/talent', async (req, res) => {
+app.get('/matching/project/:projectId/talent', async (req, res) => {
   try {
     const { projectId } = req.params;
     console.log(`🎯 Find talent for project endpoint called: ${projectId}`);
@@ -11242,7 +11242,7 @@ app.get('/api/matching/project/:projectId/talent', async (req, res) => {
 });
 
 // GET /api/matching/talent/projects - Find projects for talent
-app.get('/api/matching/talent/projects', async (req, res) => {
+app.get('/matching/talent/projects', async (req, res) => {
   try {
     console.log('🎯 Find projects for talent endpoint called');
     const talentId = 'user_123'; // In real app, get from JWT token
@@ -11339,7 +11339,7 @@ app.get('/api/matching/talent/projects', async (req, res) => {
 });
 
 // GET /api/matching/project/:projectId/talent/:talentId/explain - Explain match
-app.get('/api/matching/project/:projectId/talent/:talentId/explain', async (req, res) => {
+app.get('/matching/project/:projectId/talent/:talentId/explain', async (req, res) => {
   try {
     const { projectId, talentId } = req.params;
     console.log(`🎯 Explain match endpoint called: ${projectId} -> ${talentId}`);
@@ -11365,7 +11365,7 @@ app.get('/api/matching/project/:projectId/talent/:talentId/explain', async (req,
 });
 
 // POST /api/matching/save-talent - Save talent
-app.post('/api/matching/save-talent', async (req, res) => {
+app.post('/matching/save-talent', async (req, res) => {
   try {
     console.log('🎯 Save talent endpoint called');
     const { talentId, projectId, notes } = req.body;
@@ -11385,7 +11385,7 @@ app.post('/api/matching/save-talent', async (req, res) => {
 });
 
 // GET /api/matching/saved-talents - Get saved talents
-app.get('/api/matching/saved-talents', async (req, res) => {
+app.get('/matching/saved-talents', async (req, res) => {
   try {
     console.log('🎯 Get saved talents endpoint called');
     const savedTalents = [
@@ -11413,7 +11413,7 @@ app.get('/api/matching/saved-talents', async (req, res) => {
 });
 
 // DELETE /api/matching/saved-talents/:talentId - Remove saved talent
-app.delete('/api/matching/saved-talents/:talentId', async (req, res) => {
+app.delete('/matching/saved-talents/:talentId', async (req, res) => {
   try {
     const { talentId } = req.params;
     console.log(`🎯 Remove saved talent endpoint called: ${talentId}`);
@@ -11429,7 +11429,7 @@ app.delete('/api/matching/saved-talents/:talentId', async (req, res) => {
 });
 
 // GET /api/matching/admin/stats - Get matching statistics (Admin)
-app.get('/api/matching/admin/stats', async (req, res) => {
+app.get('/matching/admin/stats', async (req, res) => {
   try {
     console.log('🎯 Get matching stats endpoint called');
     const stats = {
@@ -11459,7 +11459,7 @@ console.log('🔍 DEBUG: Skipping Admin and Disputes modules for debugging...');
 
 
 // GET /api/admin/stats/overview - Admin statistics overview
-app.get('/api/admin/stats/overview', authenticateToken, requireAdmin, async (req, res) => {
+app.get('/admin/stats/overview', authenticateToken, requireAdmin, async (req, res) => {
   try {
     console.log('👑 Admin stats overview endpoint called');
     
@@ -11535,7 +11535,7 @@ app.get('/api/admin/stats/overview', authenticateToken, requireAdmin, async (req
 });
 
 // GET /api/admin/users/management - User management
-app.get('/api/admin/users/management', authenticateToken, requireAdmin, async (req, res) => {
+app.get('/admin/users/management', authenticateToken, requireAdmin, async (req, res) => {
   try {
     console.log('👑 User management endpoint called');
     
@@ -11595,7 +11595,7 @@ app.get('/api/admin/users/management', authenticateToken, requireAdmin, async (r
 });
 
 // POST /api/admin/users/:userId/suspend - Suspend user
-app.post('/api/admin/users/:userId/suspend', authenticateToken, requireAdmin, async (req, res) => {
+app.post('/admin/users/:userId/suspend', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
     const { reason, duration } = req.body;
@@ -11627,7 +11627,7 @@ app.post('/api/admin/users/:userId/suspend', authenticateToken, requireAdmin, as
 });
 
 // POST /api/admin/users/:userId/verify - Verify user
-app.post('/api/admin/users/:userId/verify', authenticateToken, requireAdmin, async (req, res) => {
+app.post('/admin/users/:userId/verify', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
     console.log(`👑 Verify user endpoint called: ${userId}`);
@@ -11645,7 +11645,7 @@ app.post('/api/admin/users/:userId/verify', authenticateToken, requireAdmin, asy
 });
 
 // GET /api/admin/platform/health - Platform health
-app.get('/api/admin/platform/health', async (req, res) => {
+app.get('/admin/platform/health', async (req, res) => {
   try {
     console.log('👑 Platform health endpoint called');
     const health = {
@@ -11672,7 +11672,7 @@ app.get('/api/admin/platform/health', async (req, res) => {
 });
 
 // GET /api/admin/system/info - System information
-app.get('/api/admin/system/info', async (req, res) => {
+app.get('/admin/system/info', async (req, res) => {
   try {
     console.log('👑 System info endpoint called');
     const systemInfo = {
@@ -11693,7 +11693,7 @@ app.get('/api/admin/system/info', async (req, res) => {
 });
 
 // POST /api/admin/reports/generate - Generate report
-app.post('/api/admin/reports/generate', async (req, res) => {
+app.post('/admin/reports/generate', async (req, res) => {
   try {
     console.log('👑 Generate report endpoint called');
     const { reportType, dateRange, filters } = req.body;
@@ -11714,7 +11714,7 @@ app.post('/api/admin/reports/generate', async (req, res) => {
 });
 
 // POST /api/admin/announcements - Create announcement
-app.post('/api/admin/announcements', async (req, res) => {
+app.post('/admin/announcements', async (req, res) => {
   try {
     console.log('👑 Create announcement endpoint called');
     const { title, content, targetAudience, priority } = req.body;
@@ -11736,7 +11736,7 @@ app.post('/api/admin/announcements', async (req, res) => {
 });
 
 // POST /api/admin/system/clear-cache - Clear system cache
-app.post('/api/admin/system/clear-cache', async (req, res) => {
+app.post('/admin/system/clear-cache', async (req, res) => {
   try {
     console.log('👑 Clear cache endpoint called');
     const result = {
@@ -11753,7 +11753,7 @@ app.post('/api/admin/system/clear-cache', async (req, res) => {
 });
 
 // POST /api/admin/system/backup-database - Backup database
-app.post('/api/admin/system/backup-database', async (req, res) => {
+app.post('/admin/system/backup-database', async (req, res) => {
   try {
     console.log('👑 Backup database endpoint called');
     const backup = {
