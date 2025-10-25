@@ -3577,6 +3577,236 @@ app.post('/api/auth/reset-password', async (req, res) => {
 
 console.log('✅ Auth routes registered');
 
+// Add non-prefixed auth routes for frontend compatibility
+console.log('🔐 Adding non-prefixed auth routes...');
+
+// POST /auth/register - User registration (without /api prefix)
+app.post('/auth/register', async (req, res) => {
+  try {
+    logger.info('Registration attempt (non-prefixed)', { 
+      email: req.body.email, 
+      userType: req.body.userType,
+      ip: req.ip 
+    });
+    
+    const { email, password, userType, firstName, lastName, companyName } = req.body;
+    
+    if (!email || !password || !userType || !firstName || !lastName) {
+      return res.status(400).json({ 
+        error: 'Missing required fields',
+        message: 'Email, password, userType, firstName, and lastName are required' 
+      });
+    }
+    
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    });
+    
+    if (existingUser) {
+      return res.status(409).json({ 
+        error: 'User already exists',
+        message: 'An account with this email already exists' 
+      });
+    }
+    
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    // Create user with profile
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        userType: userType.toUpperCase(),
+        status: 'ACTIVE',
+        emailVerified: true,
+        profile: {
+          create: {
+            firstName,
+            lastName,
+            displayName: `${firstName} ${lastName}`,
+            companyName: companyName || null
+          }
+        }
+      },
+      include: {
+        profile: true
+      }
+    });
+    
+    // Generate tokens
+    const tokenPayload = {
+      id: user.id,
+      email: user.email,
+      userType: user.userType
+    };
+    
+    const accessToken = generateToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
+    
+    logger.info('User registered successfully', { 
+      userId: user.id, 
+      email: user.email,
+      userType: user.userType 
+    });
+    
+    return res.status(201).json({
+      user: {
+        id: user.id,
+        email: user.email,
+        userType: user.userType,
+        profile: user.profile
+      },
+      tokens: {
+        accessToken,
+        refreshToken,
+        expiresIn: 86400
+      }
+    });
+  } catch (error) {
+    logger.error('Registration error', { error: error instanceof Error ? error.message : 'Unknown error' });
+    const errorMessage = error instanceof Error ? error.message : 'Registration failed';
+    return res.status(500).json({ error: 'Registration failed', message: errorMessage });
+  }
+});
+
+// POST /auth/login - User login (without /api prefix)
+app.post('/auth/login', async (req, res) => {
+  try {
+    console.log('🔐 Login endpoint hit (non-prefixed)', { 
+      email: req.body?.email, 
+      hasPassword: !!req.body?.password
+    });
+    logger.info('Login attempt (non-prefixed)', { email: req.body.email, ip: req.ip });
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ 
+        error: 'Missing credentials',
+        message: 'Email and password are required' 
+      });
+    }
+    
+    // Get user from database
+    console.log('🔍 Searching for user in database:', email);
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        profile: {
+          select: {
+            firstName: true,
+            lastName: true,
+            displayName: true,
+            avatar: true,
+            companyName: true
+          }
+        }
+      }
+    });
+    
+    console.log('🔍 User found:', user ? { id: user.id, email: user.email, hasPassword: !!user.password } : 'No user found');
+    
+    if (!user) {
+      console.log('❌ Login failed - user not found');
+      logger.warn('Login failed - user not found', { email, ip: req.ip });
+      return res.status(401).json({ 
+        error: 'Invalid credentials',
+        message: 'Invalid email or password' 
+      });
+    }
+    
+    // Verify password
+    let isValidPassword = false;
+    try {
+      isValidPassword = await bcrypt.compare(password, user.password || '');
+    } catch (bcryptError) {
+      console.error('Bcrypt comparison error:', bcryptError);
+    }
+    
+    if (!isValidPassword) {
+      console.log('❌ Login failed - invalid password');
+      logger.warn('Login failed - invalid password', { email, ip: req.ip });
+      return res.status(401).json({ 
+        error: 'Invalid credentials',
+        message: 'Invalid email or password' 
+      });
+    }
+    
+    // Generate tokens
+    const tokenPayload = {
+      id: user.id,
+      email: user.email,
+      userType: user.userType
+    };
+    
+    const accessToken = generateToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
+    
+    logger.info('Login successful', { 
+      userId: user.id, 
+      email: user.email,
+      userType: user.userType 
+    });
+    
+    return res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        userType: user.userType,
+        profile: user.profile
+      },
+      tokens: {
+        accessToken,
+        refreshToken,
+        expiresIn: 86400
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    logger.error('Login error', { error: error instanceof Error ? error.message : 'Unknown error' });
+    const errorMessage = error instanceof Error ? error.message : 'Login failed';
+    return res.status(500).json({ error: 'Login failed', message: errorMessage });
+  }
+});
+
+// GET /auth/check - Check authentication status (without /api prefix)
+app.get('/auth/check', authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      include: {
+        profile: true
+      }
+    });
+    
+    if (!user) {
+      return res.status(401).json({
+        authenticated: false,
+        message: 'User not found'
+      });
+    }
+    
+    return res.json({
+      authenticated: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        userType: user.userType,
+        profile: user.profile
+      }
+    });
+  } catch (error) {
+    logger.error('Auth check error', { error: error instanceof Error ? error.message : 'Unknown error' });
+    return res.status(500).json({
+      authenticated: false,
+      message: 'Authentication check failed'
+    });
+  }
+});
+
+console.log('✅ Non-prefixed auth routes registered');
+
 // Projects routes - with real database integration
 console.log('📋 Adding Projects routes...');
 app.get('/api/projects', async (req, res) => {
