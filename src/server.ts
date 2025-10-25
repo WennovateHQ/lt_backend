@@ -415,6 +415,9 @@ const allowedOrigins = [
   'https://localtalents.ca',
   'https://www.localtalents.ca',
   'https://lt-frontend-hvhnf2hmd7bhb6br.canadacentral-01.azurewebsites.net',
+  'https://lt-backend-api-e5dwchcnb2cfdwe2.canadacentral-01.azurewebsites.net',
+  'https://lt-backend-api-e5dwchcnb2cfdwe2.scm.canadacentral-01.azurewebsites.net', // SCM site
+  'http://localhost:5173',
   process.env['FRONTEND_URL']
 ].filter(Boolean); // Remove undefined values
 
@@ -423,6 +426,10 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or Postman)
     if (!origin) return callback(null, true);
     
+    // Check if origin ends with azurewebsites.net (allow all Azure subdomains)
+    if (origin.endsWith('.azurewebsites.net')) {
+      return callback(null, true);
+    }
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -432,8 +439,17 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400, // 24 hours
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
 app.use(helmet({
