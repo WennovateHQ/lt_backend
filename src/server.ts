@@ -409,48 +409,72 @@ console.log('✅ Basic routes added (including Stripe test)');
 
 // Middleware setup
 console.log('⚙️ Setting up middleware...');
-// CORS configuration - allow multiple origins
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://localtalents.ca',
-  'https://www.localtalents.ca',
-  'https://lt-frontend-hvhnf2hmd7bhb6br.canadacentral-01.azurewebsites.net',
-  'https://lt-backend-api-e5dwchcnb2cfdwe2.canadacentral-01.azurewebsites.net',
-  'https://lt-backend-api-e5dwchcnb2cfdwe2.scm.canadacentral-01.azurewebsites.net', // SCM site
-  'http://localhost:5173',
-  process.env['FRONTEND_URL']
-].filter(Boolean); // Remove undefined values
-
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or Postman)
-    if (!origin) return callback(null, true);
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    console.log('🔍 CORS check for origin:', origin);
     
-    // Check if origin ends with azurewebsites.net (allow all Azure subdomains)
-    if (origin.endsWith('.azurewebsites.net')) {
+    const allowedOrigins = [
+      'https://lt-frontend-hvhnf2hmd7bhb6br.canadacentral-01.azurewebsites.net',
+      'https://lt-backend-api-e5dwchcnb2cfdwe2.canadacentral-01.azurewebsites.net',
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ];
+    
+    // Allow requests with no origin (server-to-server, mobile apps, Postman)
+    if (!origin) {
+      console.log('✅ No origin - allowing');
       return callback(null, true);
     }
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.warn(`⚠️ CORS blocked request from origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
+    
+    // Allow all Azure sites
+    if (origin.endsWith('.azurewebsites.net')) {
+      console.log('✅ Azure site - allowing');
+      return callback(null, true);
     }
+    
+    // Check against allowed list
+    if (allowedOrigins.includes(origin)) {
+      console.log('✅ Allowed origin - allowing');
+      return callback(null, true);
+    }
+    
+    console.log('❌ Origin not allowed:', origin);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
   allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
+    'Content-Type',
+    'Authorization',
     'X-Requested-With',
     'Accept',
-    'Origin'
+    'Origin',
+    'Access-Control-Request-Method',
+    'Access-Control-Request-Headers'
   ],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
   maxAge: 86400, // 24 hours
   preflightContinue: false,
   optionsSuccessStatus: 204
-}));
+};
+
+// Apply CORS - MUST BE FIRST
+app.use(cors(corsOptions));
+
+// Explicitly handle OPTIONS requests for all routes
+app.options('*', cors(corsOptions));
+
+// Body parser AFTER CORS
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Request logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log('Origin:', req.get('origin') || 'none');
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  next();
+});
 
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
