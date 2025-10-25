@@ -416,6 +416,8 @@ const corsOptions = {
     const allowedOrigins = [
       'https://lt-frontend-hvhnf2hmd7bhb6br.canadacentral-01.azurewebsites.net',
       'https://lt-backend-api-e5dwchcnb2cfdwe2.canadacentral-01.azurewebsites.net',
+      'https://www.localtalents.ca',
+      'https://localtalents.ca',
       'http://localhost:3000',
       'http://localhost:3001',
     ];
